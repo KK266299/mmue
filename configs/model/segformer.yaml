@@ -1,0 +1,7 @@
+defaults:
+  - _base
+name: segformer_b0
+variant: b0
+num_classes: 40
+in_channels: 4
+pretrained: true

@@ -1,0 +1,6 @@
+defaults:
+  - _base
+name: deeplabv3plus
+num_classes: 40
+in_channels: 4
+pretrained: true

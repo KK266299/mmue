@@ -406,14 +406,22 @@ class ExperimentManager:
             import numpy as np
             vol_shape = tuple(np.asarray(img).shape)
 
-        if len(vol_shape) != 4:
-            raise ValueError(f"[ExperimentManager] UE backend expects 4D (C,D,H,W); got {vol_shape}")
-
-        C, D, H, W = vol_shape
-        if tied_channels:
-            image_size = (1, D, H, W)
+        if len(vol_shape) == 3:
+            # 2D image: (C, H, W)
+            C, H, W = vol_shape
+            if tied_channels:
+                image_size = (1, H, W)
+            else:
+                image_size = (C, H, W)
+        elif len(vol_shape) == 4:
+            # 3D volume: (C, D, H, W)
+            C, D, H, W = vol_shape
+            if tied_channels:
+                image_size = (1, D, H, W)
+            else:
+                image_size = (C, D, H, W)
         else:
-            image_size = (C, D, H, W)
+            raise ValueError(f"[ExperimentManager] UE backend expects 3D (C,H,W) or 4D (C,D,H,W); got {vol_shape}")
 
         self.logger.info(
             f"[ExperimentManager] Building UE LearnableProvider | "

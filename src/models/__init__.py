@@ -30,6 +30,11 @@ from .unet import UNet
 from .unet_plusplus import UNetPlusPlus
 from .attention_unet import AttentionUNet
 from .trans_unet import TransUNet
+from .deeplabv3plus import DeepLabV3Plus, DeepLabV3PlusR50, DeepLabV3PlusR101
+from .segformer import (
+    SegFormer, SegFormerB0, SegFormerB1, SegFormerB2,
+    SegFormerB3, SegFormerB4, SegFormerB5,
+)
 
 # Register models with the unified registry
 register_model('resnet18')(ResNet18)
@@ -69,4 +74,7 @@ __all__ = [
     "EfficientNetB4", "EfficientNetB5", "EfficientNetB6", "EfficientNetB7",
     "EfficientNetV2S", "EfficientNetV2M", "EfficientNetV2L",
     "UNet", "UNetPlusPlus", "AttentionUNet", "TransUNet",
+    "DeepLabV3Plus", "DeepLabV3PlusR50", "DeepLabV3PlusR101",
+    "SegFormer", "SegFormerB0", "SegFormerB1", "SegFormerB2",
+    "SegFormerB3", "SegFormerB4", "SegFormerB5",
 ]
