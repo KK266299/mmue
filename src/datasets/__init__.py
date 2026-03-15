@@ -14,6 +14,10 @@ from .flare21 import (
     FLARE21VolumeDataset,
 )
 
+from .nyu import (
+    NYUDepthDataset,
+)
+
 # Import builders so they register themselves
 from .brats19 import (
     Brats19SegBuilder,
@@ -30,13 +34,20 @@ from .flare21 import (
     Flare21UEBuilder,
 )
 
+from .nyu import (
+    NYUSegBuilder,
+    NYUUEBuilder,
+)
+
 # Register dataset implementations with the unified registry
 register_dataset('brats19_seg')(BraTS19VolumeDataset)
 register_dataset('kits19_seg')(KiTS19VolumeDataset)
 register_dataset('flare21_seg')(FLARE21VolumeDataset)
+register_dataset('nyu_seg')(NYUDepthDataset)
 
 __all__ = [
     'BraTS19VolumeDataset',
     'KiTS19VolumeDataset',
     'FLARE21VolumeDataset',
+    'NYUDepthDataset',
 ]

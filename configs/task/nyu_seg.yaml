@@ -1,0 +1,7 @@
+defaults:
+  - /_global_patches: nyu_seg
+  - _base
+
+name: nyu_seg
+save_dir: /home/dengzhipeng/data/project/mmue/outputs/nyu_seg
+eval_strategy: nyu_seg

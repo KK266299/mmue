@@ -1,0 +1,40 @@
+data:
+  # NYUDepthv2 原始数据根目录
+  raw_root: /home/dengzhipeng/data/mmue/NYUDepthv2
+
+  # 子目录与文件格式（参考 Sigma）
+  rgb_folder: RGB
+  depth_folder: Depth
+  label_folder: Label
+  rgb_format: ".jpg"
+  depth_format: ".png"
+  label_format: ".png"
+
+  # 训练/测试划分文件（每行一个文件名，不含后缀）
+  train_list: train.txt
+  test_list: test.txt
+
+  # 预处理结果保存目录
+  preproc_root: /home/dengzhipeng/data/mmue_processed/nyu
+
+  # 类别数（NYU 40 类语义分割）
+  num_classes: 40
+
+  # 标签变换：原始标签 1~40 → 0~39（减 1）
+  label_offset: -1
+
+  # 目标尺寸 (H, W)，设为 null 则保持原始尺寸 (480, 640)
+  target_size: null
+
+  # 从 train 集中划分 val 的比例
+  val_ratio: 0.1
+  split_seed: 42
+
+  # ImageNet 归一化（用于 RGB 通道）
+  rgb_mean: [0.485, 0.456, 0.406]
+  rgb_std: [0.229, 0.224, 0.225]
+
+  # 深度通道归一化（在预处理时不做，训练时可选）
+  depth_normalize: false
+
+  run_preprocess: true

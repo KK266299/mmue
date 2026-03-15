@@ -1,0 +1,6 @@
+defaults:
+  - /_global_patches: nyu_ue
+  - _base
+
+name: nyu_ue
+save_dir: /home/dengzhipeng/data/project/mmue/outputs/nyu_ue
