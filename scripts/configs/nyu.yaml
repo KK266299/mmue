@@ -26,8 +26,10 @@ data:
   # 目标尺寸 (H, W)，设为 null 则保持原始尺寸 (480, 640)
   target_size: null
 
-  # 从 train 集中划分 val 的比例
-  val_ratio: 0.1
+  # 数据集划分比例：train / val / test = 0.75 / 0.15 / 0.15
+  train_ratio: 0.75
+  val_ratio: 0.15
+  test_ratio: 0.15
   split_seed: 42
 
   # ImageNet 归一化（用于 RGB 通道）

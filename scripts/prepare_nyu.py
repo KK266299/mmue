@@ -139,16 +139,29 @@ def process_sample(
     return h5_path
 
 
-def split_train_val(names, val_ratio: float, seed: int = 42):
-    """Split training names into train and val subsets."""
+def split_train_val_test(
+    names,
+    train_ratio: float = 0.75,
+    val_ratio: float = 0.15,
+    test_ratio: float = 0.15,
+    seed: int = 42,
+):
+    """Split all names into train / val / test by ratio (0.75 / 0.15 / 0.15)."""
     n = len(names)
     rng = np.random.RandomState(seed)
     idx = rng.permutation(n)
-    n_val = max(1, int(round(val_ratio * n)))
-    val_idx = set(idx[:n_val].tolist())
-    train_names = [names[i] for i in range(n) if i not in val_idx]
-    val_names = [names[i] for i in range(n) if i in val_idx]
-    return train_names, val_names
+
+    n_train = int(round(train_ratio * n))
+    n_val = int(round(val_ratio * n))
+    # test gets the remainder
+    train_idx = idx[:n_train]
+    val_idx = idx[n_train:n_train + n_val]
+    test_idx = idx[n_train + n_val:]
+
+    train_names = [names[i] for i in train_idx]
+    val_names = [names[i] for i in val_idx]
+    test_names = [names[i] for i in test_idx]
+    return train_names, val_names, test_names
 
 
 def write_split_csv(csv_path: str, records: list):
@@ -181,20 +194,33 @@ def main(config_path: str):
     if target_size is not None:
         target_size = tuple(int(x) for x in target_size)
 
-    val_ratio = float(data_cfg.get("val_ratio", 0.1))
+    train_ratio = float(data_cfg.get("train_ratio", 0.75))
+    val_ratio = float(data_cfg.get("val_ratio", 0.15))
+    test_ratio = float(data_cfg.get("test_ratio", 0.15))
     split_seed = int(data_cfg.get("split_seed", 42))
     run_preprocess = bool(data_cfg.get("run_preprocess", True))
 
-    # Read file lists
+    # Read file lists, merge all samples then re-split
     train_list_path = os.path.join(raw_root, data_cfg.get("train_list", "train.txt"))
     test_list_path = os.path.join(raw_root, data_cfg.get("test_list", "test.txt"))
 
-    train_all_names = read_file_list(train_list_path)
-    test_names = read_file_list(test_list_path)
-    print(f"Found {len(train_all_names)} training + {len(test_names)} test samples")
+    orig_train_names = read_file_list(train_list_path)
+    orig_test_names = read_file_list(test_list_path)
+    all_names = orig_train_names + orig_test_names
+    # Deduplicate while preserving order
+    seen = set()
+    unique_names = []
+    for n in all_names:
+        if n not in seen:
+            seen.add(n)
+            unique_names.append(n)
+    all_names = unique_names
+    print(f"Found {len(all_names)} total samples (orig train={len(orig_train_names)}, orig test={len(orig_test_names)})")
 
-    # Split train into train/val
-    train_names, val_names = split_train_val(train_all_names, val_ratio, split_seed)
+    # Re-split by 0.75 / 0.15 / 0.15
+    train_names, val_names, test_names = split_train_val_test(
+        all_names, train_ratio, val_ratio, test_ratio, split_seed
+    )
     print(f"Split: train={len(train_names)}, val={len(val_names)}, test={len(test_names)}")
 
     # Prepare output
@@ -202,7 +228,6 @@ def main(config_path: str):
     out_h5_dir = os.path.join(preproc_root, "h5")
     ensure_dir(out_h5_dir)
 
-    all_names = train_all_names + test_names
     name_to_h5 = {}
 
     if run_preprocess:
