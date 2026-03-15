@@ -2,15 +2,10 @@ data:
   # NYUDepthv2 原始数据根目录
   raw_root: /home/dengzhipeng/data/mmue/NYUDepthv2
 
-  # 子目录与文件格式（参考 Sigma）
-  rgb_folder: RGB
+  # Depth 子目录（RGB/Label 路径从 txt 文件中直接读取）
   depth_folder: Depth
-  label_folder: Label
-  rgb_format: ".jpg"
-  depth_format: ".png"
-  label_format: ".png"
 
-  # 训练/测试划分文件（每行一个文件名，不含后缀）
+  # 划分文件，每行格式: RGB/x.jpg<TAB>Label/x.png
   train_list: train.txt
   test_list: test.txt
 

@@ -50,6 +50,10 @@ class SegTrainer(TrainerBase):
         # 类别权重，用于处理类别不平衡（如KiTS19的肿瘤类别）
         self.ce_weight = get_config(crit_cfg, "ce_weight", None)
 
+        # ignore_index for labels (e.g. 255 for padded pixels in 2D seg)
+        eval_cfg = get_config(config, "evaluation", DictConfig({}))
+        self.ignore_index = int(get_config(eval_cfg, "ignore_index", -1))
+
         self._loss = self._build_loss()
 
     def _build_loss(self) -> nn.Module:
@@ -105,11 +109,18 @@ class SegTrainer(TrainerBase):
         """
         self.optimizer.zero_grad()
 
-        x = batch["image"].to(self.device)           # 3D: [B,C,D,H,W]
-        y_id = batch["label"].to(self.device).long() # 3D: [B,D,H,W]
+        x = batch["image"].to(self.device)           # [B,C,...] (2D or 3D)
+        y_id = batch["label"].to(self.device).long() # [B,...] (2D or 3D)
 
-        logits = self.model(x)                       # [B,num_classes,D,H,W]
-        loss = self._loss(logits, y_id.unsqueeze(1)) # -> y: [B,1,D,H,W]
+        logits = self.model(x)                       # [B,num_classes,...]
+        num_classes = logits.shape[1]
+
+        # Replace out-of-range labels with 0 to prevent CUDA assert in nll_loss.
+        # DiceCELoss with to_onehot_y=True crashes if label >= num_classes.
+        if self.ignore_index >= 0 or y_id.max() >= num_classes or y_id.min() < 0:
+            y_id = y_id.clone()
+            y_id[(y_id < 0) | (y_id >= num_classes)] = 0
+        loss = self._loss(logits, y_id.unsqueeze(1)) # y: [B,1,...]
         loss.backward()
         self.optimizer.step()
 
