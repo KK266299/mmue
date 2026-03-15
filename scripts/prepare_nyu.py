@@ -88,15 +88,21 @@ def load_depth(path: str) -> np.ndarray:
     return depth.astype(np.float32)
 
 
-def load_label(path: str, offset: int = -1) -> np.ndarray:
-    """Load label as uint8 [H, W], apply offset (1~40 -> 0~39)."""
+def load_label(path: str, offset: int = -1, num_classes: int = 40) -> np.ndarray:
+    """Load label as uint8 [H, W], apply offset (1~40 -> 0~39).
+
+    Pixels outside [0, num_classes) after offset are set to 255 (ignore).
+    """
     label = cv2.imread(path, cv2.IMREAD_UNCHANGED)
     if label is None:
         raise FileNotFoundError(f"Cannot read label image: {path}")
     if label.ndim == 3:
         label = label[:, :, 0]
     label = label.astype(np.int16) + offset
+    # Mark out-of-range pixels as ignore (255)
+    invalid = (label < 0) | (label >= num_classes)
     label = np.clip(label, 0, 255).astype(np.uint8)
+    label[invalid] = 255
     return label
 
 
@@ -116,6 +122,7 @@ def process_sample(
     label_offset: int,
     target_size,
     out_dir: str,
+    num_classes: int = 40,
 ) -> str:
     """Process a single NYU sample: load RGB+Depth+Label, save as H5.
 
@@ -130,7 +137,7 @@ def process_sample(
 
     rgb = load_rgb(rgb_path)          # [H, W, 3], float32, [0, 1]
     depth = load_depth(depth_path)    # [H, W], float32
-    label = load_label(label_path, offset=label_offset)  # [H, W], uint8
+    label = load_label(label_path, offset=label_offset, num_classes=num_classes)  # [H, W], uint8
 
     # Normalize depth to [0, 1]
     depth = normalize_depth(depth)
@@ -206,6 +213,7 @@ def main(config_path: str):
     depth_folder = data_cfg.get("depth_folder", "Depth")
 
     label_offset = int(data_cfg.get("label_offset", -1))
+    num_classes = int(data_cfg.get("num_classes", 40))
     target_size = data_cfg.get("target_size", None)
     if target_size is not None:
         target_size = tuple(int(x) for x in target_size)
@@ -256,6 +264,7 @@ def main(config_path: str):
                 label_offset=label_offset,
                 target_size=target_size,
                 out_dir=out_h5_dir,
+                num_classes=num_classes,
             )
             id_to_h5[sample["sample_id"]] = h5_path
     else:

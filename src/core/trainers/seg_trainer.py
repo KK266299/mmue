@@ -112,13 +112,14 @@ class SegTrainer(TrainerBase):
         x = batch["image"].to(self.device)           # [B,C,...] (2D or 3D)
         y_id = batch["label"].to(self.device).long() # [B,...] (2D or 3D)
 
-        # Replace ignore_index pixels (e.g. 255 from padding in 2D seg) with 0.
-        # DiceCELoss with to_onehot_y=True crashes if label >= num_classes.
-        if self.ignore_index >= 0:
-            y_id = y_id.clone()
-            y_id[y_id == self.ignore_index] = 0
-
         logits = self.model(x)                       # [B,num_classes,...]
+        num_classes = logits.shape[1]
+
+        # Replace out-of-range labels with 0 to prevent CUDA assert in nll_loss.
+        # DiceCELoss with to_onehot_y=True crashes if label >= num_classes.
+        if self.ignore_index >= 0 or y_id.max() >= num_classes or y_id.min() < 0:
+            y_id = y_id.clone()
+            y_id[(y_id < 0) | (y_id >= num_classes)] = 0
         loss = self._loss(logits, y_id.unsqueeze(1)) # y: [B,1,...]
         loss.backward()
         self.optimizer.step()
