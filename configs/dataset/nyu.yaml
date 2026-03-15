@@ -1,5 +1,5 @@
 name: nyu
-train_csv_path: /home/dengzhipeng/data/mmue_processed/nyu/train.csv
-val_csv_path: /home/dengzhipeng/data/mmue_processed/nyu/val.csv
-test_csv_path: /home/dengzhipeng/data/mmue_processed/nyu/test.csv
-image_folder: /home/dengzhipeng/data/mmue_processed/nyu/h5
+train_csv_path: /home/dengzhipeng/data/mmue/processed_NYU/train.csv
+val_csv_path: /home/dengzhipeng/data/mmue/processed_NYU/val.csv
+test_csv_path: /home/dengzhipeng/data/mmue/processed_NYU/test.csv
+image_folder: /home/dengzhipeng/data/mmue/processed_NYU/h5

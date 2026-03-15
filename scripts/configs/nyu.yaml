@@ -15,7 +15,7 @@ data:
   test_list: test.txt
 
   # 预处理结果保存目录
-  preproc_root: /home/dengzhipeng/data/mmue_processed/nyu
+  preproc_root: /home/dengzhipeng/data/mmue/processed_NYU
 
   # 类别数（NYU 40 类语义分割）
   num_classes: 40
