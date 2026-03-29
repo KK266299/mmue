@@ -19,8 +19,8 @@ training:
   data:
     transforms:
       normalize: true
-      geom_aug: true
-      intensity_aug: true
+      geom_aug: false
+      intensity_aug: false
       image_size: [4, 480, 640]
       crop_size: [480, 640]
       scale_range: [0.5, 1.75]
